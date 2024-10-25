@@ -111,12 +111,16 @@ class PINNsformer(nn.Module):
         ])
 
     def forward(self, x, t):
-        src = torch.cat((x,t), dim=-1)
-        src = self.linear_emb(src)
-
-        e_outputs = self.encoder(src)
-        d_output = self.decoder(src, e_outputs)
-        output = self.linear_out(d_output)
+        # x, t: torch.Size([N, num_steps, 1])
+        # print('in pinnsformer: ', x.shape, t.shape)
+        src = torch.cat((x,t), dim=-1)  # torch.Size([N, num_steps, 2])
+        # embedding - 单层MLP
+        # print('beformer emb: ', src.shape)
+        src = self.linear_emb(src)  # torch.Size([N, num_steps, 32])
+        e_outputs = self.encoder(src)  # torch.Size([N, num_steps, 32])
+        d_output = self.decoder(src, e_outputs)  # torch.Size([N, num_steps, 32])
+        # 输出层：三层MLP
+        output = self.linear_out(d_output)  #  torch.Size([N, num_steps, 1])
         # pdb.set_trace()
         # raise Exception('stop')
         return output
